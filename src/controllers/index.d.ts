@@ -16,7 +16,7 @@ type Order = {
   client?: Client;
   deliver_man?: string;
   price: number;
-  items?: string[];
+  items: string[];
   status?: string;
   change?: number;
 };

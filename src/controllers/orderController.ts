@@ -4,7 +4,7 @@ import { ControllerResponse, Order, Product } from ".";
 import menu from "../data/menu.json";
 
 let orders: Order[] = [];
-let order: Order = { price: 0 };
+let order: Order = { price: 0, items: [] };
 
 export function orderController(
   socket: Socket,
@@ -13,13 +13,6 @@ export function orderController(
   switch (options[1]) {
     case "create":
       order.id = crypto.randomUUID();
-
-      if (!order.id) {
-        return {
-          message: `FINISH:invalid argument; no order placed;\nuse CREATE command to place a order.`,
-          error: "BAD_REQUEST",
-        };
-      }
 
       order.items = options.slice(2, options.length);
       if (order.items.length > 0) {
@@ -38,7 +31,7 @@ export function orderController(
         order.status = "AWAITING_PAYMENT";
         orders.push(order);
 
-        order = { price: 0 };
+        order = { price: 0, items: [] };
         return {
           message: `Order #${orders.length} placed successfully`,
           data: orders[orders.length - 1],
@@ -48,12 +41,29 @@ export function orderController(
         message: `No items to place on order`,
         error: "NO_ITEMS",
       };
+    case "add":
+      let orderId = options[2];
+      let items = options.slice(3, options.length);
+      order = orders.find((item) => orderId === item.id) as unknown as Order;
+      if (order) {
+        order.items.push(...items);
+        return {
+          message: "Products added to order ${order.id}",
+          data: order,
+        };
+      }
+
+      return {
+        message: `No products to add`,
+        error: "NO_PRODUCTS",
+      };
+
     case "remove":
       let itemId = options[2];
       if (!itemId) {
         return {
-          message: `FINISH:invalid argument; no order placed;\nuse CREATE command to place a order.`,
-          error: "BAD_REQUEST",
+          message: `No item_id provided;`,
+          error: "INVALID_ARGUMENT",
         };
       }
 
@@ -73,7 +83,7 @@ export function orderController(
         order.items = order.items.filter((i) => i !== itemId);
       }
 
-      order = { price: 0 };
+      order = { price: 0, items: [] };
       return {
         message: `Order #${orders.length} removed successfully`,
         data: orders[orders.length - 1],

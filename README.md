@@ -57,7 +57,10 @@ _args_|`string|number`|No|Extra option.
 
 #### Examples
 ```sh
-order create c1e0c221-f6d7-4eb9-8d1b-1315a498ca62
+order create 1
+```
+```sh
+order add c1e0c221-f6d7-4eb9-8d1b-1315a498ca62  2
 ```
 ```sh
 order remove c1e0c221-f6d7-4eb9-8d1b-1315a498ca62
